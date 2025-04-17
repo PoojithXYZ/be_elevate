@@ -1,5 +1,9 @@
+# Ignore all files in the experiments directory
+_experiments/
+
 # Node Modules
 node_modules/
+generated/prisma/
 
 # Build Artifacts
 dist/
@@ -13,7 +17,7 @@ id_ed25519
 ~/.ssh/config
 
 # Environment Variables
-.env
+# .env
 .env.*
 config/local.js
 
