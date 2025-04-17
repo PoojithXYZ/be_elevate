@@ -6,6 +6,12 @@ dist/
 build/
 out/
 
+# SSH Keys and Configuration
+id_rsa
+id_ed25519
+~/.ssh/known_hosts
+~/.ssh/config
+
 # Environment Variables
 .env
 .env.*
