@@ -37,7 +37,10 @@ fi
 
 # Grant privileges to the user
 echo "Granting privileges to user '$DB_USER' on database '$DB_NAME'"
+execute_sql "ALTER DATABASE \"$DB_NAME\" OWNER TO \"$DB_USER\";"
 execute_sql "GRANT ALL PRIVILEGES ON DATABASE \"$DB_NAME\" TO \"$DB_USER\";"
 execute_sql "GRANT USAGE ON SCHEMA public TO \"$DB_USER\";"
+execute_sql "GRANT ALL ON SCHEMA public TO \"$DB_USER\";"
 
+# print success message
 echo "Database '$DB_NAME' and user '$DB_USER' have been created and configured."

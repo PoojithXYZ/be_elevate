@@ -3,7 +3,7 @@ _experiments/
 
 # Node Modules
 node_modules/
-generated/prisma/
+prisma/generated/client/
 
 # Build Artifacts
 dist/
