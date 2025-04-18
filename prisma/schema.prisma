@@ -17,27 +17,269 @@ datasource db {
 
 // Schema
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String   @db.VarChar(255)
-  createdAt DateTime @default(now()) @db.Timestamp(6)
-  content   String?
-  published Boolean  @default(false)
-  authorId  Int
-  author    User     @relation(fields: [authorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+/// Stores predefined types of companies (e.g., Manufacturer, Service Provider).
+model LookupCompanyTypes {
+  companyTypeId Int      @id @default(autoincrement()) @map("company_type_id")
+  typeName      String   @map("type_name") @db.VarChar(100)
+  organizations Organization[]
+
+  @@map("lookup_company_types")
 }
 
-model Profile {
-  id     Int     @id @default(autoincrement())
-  bio    String?
-  userId Int     @unique
-  user   User    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+/// Stores predefined types of expertise (e.g., Elevators, Escalators, Modernization).
+model LookupExpertiseTypes {
+  expertiseTypeId Int      @id @default(autoincrement()) @map("expertise_type_id")
+  typeName        String   @map("type_name") @db.VarChar(100)
+  organizations   Organization[]
+
+  @@map("lookup_expertise_types")
 }
 
-model User {
-  id      Int      @id @default(autoincrement())
-  name    String?  @db.VarChar(255)
-  email   String   @unique @db.VarChar(255)
-  posts   Post[]
-  profile Profile?
+/// Stores predefined service period options (e.g., Monthly, Quarterly, Annually).
+model LookupServicePeriods {
+  servicePeriodId Int      @id @default(autoincrement()) @map("service_period_id")
+  periodName      String   @map("period_name") @db.VarChar(50)
+  organizations   Organization[]
+  serviceRequests ServiceRequest[]
+
+  @@map("lookup_service_periods")
+}
+
+/// Stores predefined contract types (e.g., Full Maintenance, Parts Only, Labor Only).
+model LookupContractTypes {
+  contractTypeId Int      @id @default(autoincrement()) @map("contract_type_id")
+  typeName       String   @map("type_name") @db.VarChar(100)
+  organizations  Organization[] // Relation for registration contract type
+  units          Unit[]         // Relation for unit service contract type
+
+  @@map("lookup_contract_types")
+}
+
+/// Stores predefined state names for addresses.
+model LookupStates {
+  stateId         Int            @id @default(autoincrement()) @map("state_id")
+  stateName       String         @map("state_name") @db.VarChar(100)
+  organizations   Organization[] // Relation for office state
+  locations       Location[]     // Relation for location state
+
+  @@map("lookup_states")
+}
+
+/// Stores predefined preferred modes of contact (e.g., Email, Phone, SMS).
+model LookupContactModes {
+  contactModeId        Int            @id @default(autoincrement()) @map("contact_mode_id")
+  modeName             String         @map("mode_name") @db.VarChar(50)
+  organizations        Organization[] // Relation for office preferred contact mode
+  locations            Location[]     // Relation for location preferred contact mode
+  serviceRequests      ServiceRequest[] // Relation for service request contact mode
+
+  @@map("lookup_contact_modes")
+}
+
+/// Stores predefined types of documents (e.g., Organization Chart, Drawing/GAD).
+model LookupDocumentTypes {
+  documentTypeId Int      @id @default(autoincrement()) @map("document_type_id")
+  typeName       String   @map("type_name") @db.VarChar(100)
+  documents      Document[]
+
+  @@map("lookup_document_types")
+}
+
+/// Stores predefined manufacturers of equipment and parts.
+model LookupManufacturers {
+  manufacturerId      Int                 @id @default(autoincrement()) @map("manufacturer_id")
+  manufacturerName    String              @map("manufacturer_name") @db.VarChar(100)
+  units               Unit[]
+  sparePartRequests   SparePartRequest[]
+
+  @@map("lookup_manufacturers")
+}
+
+/// Stores predefined types of units (e.g., Elevator, Escalator).
+model LookupUnitTypes {
+  unitTypeId Int    @id @default(autoincrement()) @map("unit_type_id")
+  typeName   String @map("type_name") @db.VarChar(100)
+  units      Unit[]
+
+  @@map("lookup_unit_types")
+}
+
+/// Stores predefined country names.
+model LookupCountries {
+  countryId         Int                @id @default(autoincrement()) @map("country_id")
+  countryName       String             @map("country_name") @db.VarChar(100)
+  sparePartRequests SparePartRequest[]
+
+  @@map("lookup_countries")
+}
+
+/// Stores data from the Registration Form, representing registered companies.
+model Organization {
+  organizationId           Int                   @id @default(autoincrement()) @map("organization_id")
+  companyName              String                @map("company_name") @db.VarChar(255)
+  companyTypeId            Int                   @map("company_type_id")
+  expertiseTypeId          Int                   @map("expertise_type_id")
+  numTechs                 Int                   @map("num_techs")
+  numCertifiedTechs        Int                   @map("num_certified_techs")
+  numVehicles              Int                   @map("num_vehicles")
+  servicePeriodsId         Int                   @map("service_periods_id")
+  contractTypeId           Int                   @map("contract_type_id") // Registration Contract Type
+  numAccidents             Int                   @map("num_accidents")
+  numIncidents             Int                   @map("num_incidents")
+  numClaims                Int                   @map("num_claims")
+  numLegalCases            Int                   @map("num_legal_cases")
+  annualTurnover           Decimal               @map("annual_turnover") @db.Decimal(18, 2)
+  yearEstablished          Int                   @map("year_established")
+  headOfOperationsName     String                @map("head_of_operations_name") @db.VarChar(255)
+  constructManagerName     String                @map("construct_manager_name") @db.VarChar(255)
+  projManagerName          String                @map("proj_manager_name") @db.VarChar(255)
+  serviceManagerName       String                @map("service_manager_name") @db.VarChar(255)
+  enggManagerName          String                @map("engg_manager_name") @db.VarChar(255)
+  salesManagerName         String                @map("sales_manager_name") @db.VarChar(255)
+  officeAddressLine1       String                @map("office_address_line1") @db.VarChar(255)
+  officeAddressLine2       String?               @map("office_address_line2") @db.VarChar(255) // Made optional
+  officePinCode            String                @map("office_pin_code") @db.VarChar(20)
+  officeStateId            Int                   @map("office_state_id")
+  officeArea               String                @map("office_area") @db.VarChar(100)
+  contactNumber            String                @map("contact_number") @db.VarChar(50)
+  preferredModeOfContactId Int                   @map("preferred_mode_of_contact_id") // Office Preferred Contact Mode
+  registrationTimestamp    DateTime              @default(now()) @map("registration_timestamp") @db.Timestamp()
+
+  // Relations
+  companyType            LookupCompanyTypes   @relation(fields: [companyTypeId], references: [companyTypeId])
+  expertiseType          LookupExpertiseTypes @relation(fields: [expertiseTypeId], references: [expertiseTypeId])
+  servicePeriod          LookupServicePeriods @relation(fields: [servicePeriodsId], references: [servicePeriodId])
+  contractType           LookupContractTypes  @relation(fields: [contractTypeId], references: [contractTypeId])
+  officeState            LookupStates         @relation(fields: [officeStateId], references: [stateId])
+  preferredContactMode   LookupContactModes   @relation(fields: [preferredModeOfContactId], references: [contactModeId])
+
+  units                  Unit[]
+  documents              Document[]
+  serviceRequests        ServiceRequest[]
+
+  @@map("organizations")
+}
+
+/// Stores unique installation site addresses and contact information.
+model Location {
+  locationId               Int                 @id @default(autoincrement()) @map("location_id")
+  addressLine1             String              @map("address_line1") @db.VarChar(255)
+  addressLine2             String?             @map("address_line2") @db.VarChar(255) // Made optional
+  zipCode                  String              @map("zip_code") @db.VarChar(20)
+  stateId                  Int                 @map("state_id")
+  area                     String              @map("area") @db.VarChar(100)
+  contactNumber            String              @map("contact_number") @db.VarChar(50)
+  preferredModeOfContactId Int                 @map("preferred_mode_of_contact_id") // Location Preferred Contact Mode
+
+  // Relations
+  state                  LookupStates       @relation(fields: [stateId], references: [stateId])
+  preferredContactMode   LookupContactModes @relation(fields: [preferredModeOfContactId], references: [contactModeId])
+  units                  Unit[]
+
+  @@map("locations")
+}
+
+/// Stores details about individual Elevator/Escalator units from Installation Forms.
+model Unit {
+  unitId                          Int                 @id @default(autoincrement()) @map("unit_id")
+  organizationId                  Int                 @map("organization_id")
+  locationId                      Int                 @map("location_id")
+  manufacturerId                  Int                 @map("manufacturer_id")
+  unitTypeId                      Int                 @map("unit_type_id")
+  contractTypeId                  Int                 @map("contract_type_id") // Unit Service Contract Type
+  numLandingDoors                 Int                 @map("num_landing_doors")
+  numCabinDoors                   Int                 @map("num_cabin_doors")
+  numFloors                       Int                 @map("num_floors")
+  cabinWidthMm                    Decimal             @map("cabin_width_mm") @db.Decimal(10, 2)
+  cabinHeightMm                   Decimal             @map("cabin_height_mm") @db.Decimal(10, 2)
+  cabinDepthMm                    Decimal             @map("cabin_depth_mm") @db.Decimal(10, 2)
+  shaftWidthMm                    Decimal             @map("shaft_width_mm") @db.Decimal(10, 2)
+  shaftHeightMm                   Decimal             @map("shaft_height_mm") @db.Decimal(10, 2)
+  shaftDepthMm                    Decimal             @map("shaft_depth_mm") @db.Decimal(10, 2)
+  pitMm                           Decimal             @map("pit_mm") @db.Decimal(10, 2)
+  installationSubmissionTimestamp DateTime            @default(now()) @map("installation_submission_timestamp") @db.Timestamp()
+
+  // Relations
+  organization     Organization         @relation(fields: [organizationId], references: [organizationId])
+  location         Location             @relation(fields: [locationId], references: [locationId])
+  manufacturer     LookupManufacturers  @relation(fields: [manufacturerId], references: [manufacturerId])
+  unitType         LookupUnitTypes      @relation(fields: [unitTypeId], references: [unitTypeId])
+  contractType     LookupContractTypes  @relation(fields: [contractTypeId], references: [contractTypeId])
+
+  documents        Document[]
+  serviceRequests  ServiceRequest[]
+
+  @@map("units")
+}
+
+/// Stores metadata about uploaded files linked to organizations or units.
+/// NOTE: The constraint "either organization_id OR unit_id is NOT NULL, but not both"
+/// must be enforced at the database level (e.g., using a CHECK constraint) or application level.
+/// Prisma schema cannot directly represent this complex constraint.
+model Document {
+  documentId       Int                 @id @default(autoincrement()) @map("document_id")
+  organizationId   Int?                @map("organization_id") // Nullable FK
+  unitId           Int?                @map("unit_id") // Nullable FK
+  documentTypeId   Int                 @map("document_type_id")
+  fileName         String              @map("file_name") @db.VarChar(255)
+  filePath         String              @map("file_path") @db.VarChar(512)
+  uploadTimestamp  DateTime            @default(now()) @map("upload_timestamp") @db.Timestamp()
+
+  // Relations
+  organization   Organization?        @relation(fields: [organizationId], references: [organizationId])
+  unit           Unit?                @relation(fields: [unitId], references: [unitId])
+  documentType   LookupDocumentTypes  @relation(fields: [documentTypeId], references: [documentTypeId])
+
+  @@map("documents")
+}
+
+/// Stores data from the Service Form, representing requests for service on units.
+model ServiceRequest {
+  serviceRequestId     Int                 @id @default(autoincrement()) @map("service_request_id")
+  organizationId       Int                 @map("organization_id")
+  unitId               Int                 @map("unit_id")
+  servicePeriodId      Int                 @map("service_period_id")
+  requestContactNumber String              @map("request_contact_number") @db.VarChar(50)
+  requestContactModeId Int                 @map("request_contact_mode_id")
+  problemDescription   String              @map("problem_description") @db.Text
+  requestTimestamp     DateTime            @default(now()) @map("request_timestamp") @db.Timestamp()
+
+  // Relations
+  organization        Organization         @relation(fields: [organizationId], references: [organizationId])
+  unit                Unit                 @relation(fields: [unitId], references: [unitId])
+  servicePeriod       LookupServicePeriods @relation(fields: [servicePeriodId], references: [servicePeriodId])
+  requestContactMode  LookupContactModes   @relation(fields: [requestContactModeId], references: [contactModeId])
+
+  @@map("service_requests")
+}
+
+/// Stores data from the Spare Part Form.
+model SparePartRequest {
+  sparePartRequestId Int                 @id @default(autoincrement()) @map("spare_part_request_id")
+  email              String              @map("email") @db.VarChar(255)
+  partNumber         String              @map("part_number") @db.VarChar(100)
+  description        String              @map("description") @db.Text
+  quantity           Int                 @map("quantity")
+  manufacturerId     Int                 @map("manufacturer_id")
+  countryId          Int                 @map("country_id")
+  requestTimestamp   DateTime            @default(now()) @map("request_timestamp") @db.Timestamp()
+
+  // Relations
+  manufacturer LookupManufacturers @relation(fields: [manufacturerId], references: [manufacturerId])
+  country      LookupCountries     @relation(fields: [countryId], references: [countryId])
+
+  @@map("spare_part_requests")
+}
+
+/// Stores data from the Contact Us Form.
+model ContactQuery {
+  contactId             Int      @id @default(autoincrement()) @map("contact_id")
+  name                  String   @map("name") @db.VarChar(255)
+  email                 String   @map("email") @db.VarChar(255)
+  businessOrJobField    String   @map("business_or_job_field") @db.VarChar(255)
+  queryText             String   @map("query_text") @db.Text
+  submissionTimestamp   DateTime @default(now()) @map("submission_timestamp") @db.Timestamp()
+
+  @@map("contact_queries")
 }
