@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "generated/client"
@@ -14,14 +8,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-// Schema
-
-
 /// Stores predefined types of companies (e.g., Manufacturer, Service Provider).
 model LookupCompanyTypes {
-  companyTypeId Int      @id @default(autoincrement()) @map("company_type_id")
-  typeName      String   @map("type_name") @db.VarChar(100)
+  companyTypeId Int            @id @default(autoincrement()) @map("company_type_id")
+  typeName      String         @map("type_name") @db.VarChar(100)
   organizations Organization[]
 
   @@map("lookup_company_types")
@@ -29,8 +19,8 @@ model LookupCompanyTypes {
 
 /// Stores predefined types of expertise (e.g., Elevators, Escalators, Modernization).
 model LookupExpertiseTypes {
-  expertiseTypeId Int      @id @default(autoincrement()) @map("expertise_type_id")
-  typeName        String   @map("type_name") @db.VarChar(100)
+  expertiseTypeId Int            @id @default(autoincrement()) @map("expertise_type_id")
+  typeName        String         @map("type_name") @db.VarChar(100)
   organizations   Organization[]
 
   @@map("lookup_expertise_types")
@@ -38,8 +28,8 @@ model LookupExpertiseTypes {
 
 /// Stores predefined service period options (e.g., Monthly, Quarterly, Annually).
 model LookupServicePeriods {
-  servicePeriodId Int      @id @default(autoincrement()) @map("service_period_id")
-  periodName      String   @map("period_name") @db.VarChar(50)
+  servicePeriodId Int              @id @default(autoincrement()) @map("service_period_id")
+  periodName      String           @map("period_name") @db.VarChar(50)
   organizations   Organization[]
   serviceRequests ServiceRequest[]
 
@@ -48,39 +38,39 @@ model LookupServicePeriods {
 
 /// Stores predefined contract types (e.g., Full Maintenance, Parts Only, Labor Only).
 model LookupContractTypes {
-  contractTypeId Int      @id @default(autoincrement()) @map("contract_type_id")
-  typeName       String   @map("type_name") @db.VarChar(100)
-  organizations  Organization[] // Relation for registration contract type
-  units          Unit[]         // Relation for unit service contract type
+  contractTypeId Int            @id @default(autoincrement()) @map("contract_type_id")
+  typeName       String         @map("type_name") @db.VarChar(100)
+  organizations  Organization[]
+  units          Unit[]
 
   @@map("lookup_contract_types")
 }
 
 /// Stores predefined state names for addresses.
 model LookupStates {
-  stateId         Int            @id @default(autoincrement()) @map("state_id")
-  stateName       String         @map("state_name") @db.VarChar(100)
-  organizations   Organization[] // Relation for office state
-  locations       Location[]     // Relation for location state
+  stateId       Int            @id @default(autoincrement()) @map("state_id")
+  stateName     String         @map("state_name") @db.VarChar(100)
+  locations     Location[]
+  organizations Organization[]
 
   @@map("lookup_states")
 }
 
 /// Stores predefined preferred modes of contact (e.g., Email, Phone, SMS).
 model LookupContactModes {
-  contactModeId        Int            @id @default(autoincrement()) @map("contact_mode_id")
-  modeName             String         @map("mode_name") @db.VarChar(50)
-  organizations        Organization[] // Relation for office preferred contact mode
-  locations            Location[]     // Relation for location preferred contact mode
-  serviceRequests      ServiceRequest[] // Relation for service request contact mode
+  contactModeId   Int              @id @default(autoincrement()) @map("contact_mode_id")
+  modeName        String           @map("mode_name") @db.VarChar(50)
+  locations       Location[]
+  organizations   Organization[]
+  serviceRequests ServiceRequest[]
 
   @@map("lookup_contact_modes")
 }
 
 /// Stores predefined types of documents (e.g., Organization Chart, Drawing/GAD).
 model LookupDocumentTypes {
-  documentTypeId Int      @id @default(autoincrement()) @map("document_type_id")
-  typeName       String   @map("type_name") @db.VarChar(100)
+  documentTypeId Int        @id @default(autoincrement()) @map("document_type_id")
+  typeName       String     @map("type_name") @db.VarChar(100)
   documents      Document[]
 
   @@map("lookup_document_types")
@@ -88,10 +78,10 @@ model LookupDocumentTypes {
 
 /// Stores predefined manufacturers of equipment and parts.
 model LookupManufacturers {
-  manufacturerId      Int                 @id @default(autoincrement()) @map("manufacturer_id")
-  manufacturerName    String              @map("manufacturer_name") @db.VarChar(100)
-  units               Unit[]
-  sparePartRequests   SparePartRequest[]
+  manufacturerId    Int                @id @default(autoincrement()) @map("manufacturer_id")
+  manufacturerName  String             @map("manufacturer_name") @db.VarChar(100)
+  sparePartRequests SparePartRequest[]
+  units             Unit[]
 
   @@map("lookup_manufacturers")
 }
@@ -116,66 +106,61 @@ model LookupCountries {
 
 /// Stores data from the Registration Form, representing registered companies.
 model Organization {
-  organizationId           Int                   @id @default(autoincrement()) @map("organization_id")
-  companyName              String                @map("company_name") @db.VarChar(255)
-  companyTypeId            Int                   @map("company_type_id")
-  expertiseTypeId          Int                   @map("expertise_type_id")
-  numTechs                 Int                   @map("num_techs")
-  numCertifiedTechs        Int                   @map("num_certified_techs")
-  numVehicles              Int                   @map("num_vehicles")
-  servicePeriodsId         Int                   @map("service_periods_id")
-  contractTypeId           Int                   @map("contract_type_id") // Registration Contract Type
-  numAccidents             Int                   @map("num_accidents")
-  numIncidents             Int                   @map("num_incidents")
-  numClaims                Int                   @map("num_claims")
-  numLegalCases            Int                   @map("num_legal_cases")
-  annualTurnover           Decimal               @map("annual_turnover") @db.Decimal(18, 2)
-  yearEstablished          Int                   @map("year_established")
-  headOfOperationsName     String                @map("head_of_operations_name") @db.VarChar(255)
-  constructManagerName     String                @map("construct_manager_name") @db.VarChar(255)
-  projManagerName          String                @map("proj_manager_name") @db.VarChar(255)
-  serviceManagerName       String                @map("service_manager_name") @db.VarChar(255)
-  enggManagerName          String                @map("engg_manager_name") @db.VarChar(255)
-  salesManagerName         String                @map("sales_manager_name") @db.VarChar(255)
-  officeAddressLine1       String                @map("office_address_line1") @db.VarChar(255)
-  officeAddressLine2       String?               @map("office_address_line2") @db.VarChar(255) // Made optional
-  officePinCode            String                @map("office_pin_code") @db.VarChar(20)
-  officeStateId            Int                   @map("office_state_id")
-  officeArea               String                @map("office_area") @db.VarChar(100)
-  contactNumber            String                @map("contact_number") @db.VarChar(50)
-  preferredModeOfContactId Int                   @map("preferred_mode_of_contact_id") // Office Preferred Contact Mode
-  registrationTimestamp    DateTime              @default(now()) @map("registration_timestamp") @db.Timestamp()
-
-  // Relations
-  companyType            LookupCompanyTypes   @relation(fields: [companyTypeId], references: [companyTypeId])
-  expertiseType          LookupExpertiseTypes @relation(fields: [expertiseTypeId], references: [expertiseTypeId])
-  servicePeriod          LookupServicePeriods @relation(fields: [servicePeriodsId], references: [servicePeriodId])
-  contractType           LookupContractTypes  @relation(fields: [contractTypeId], references: [contractTypeId])
-  officeState            LookupStates         @relation(fields: [officeStateId], references: [stateId])
-  preferredContactMode   LookupContactModes   @relation(fields: [preferredModeOfContactId], references: [contactModeId])
-
-  units                  Unit[]
-  documents              Document[]
-  serviceRequests        ServiceRequest[]
+  organizationId           Int                  @id @default(autoincrement()) @map("organization_id")
+  companyName              String               @map("company_name") @db.VarChar(255)
+  companyTypeId            Int                  @map("company_type_id")
+  expertiseTypeId          Int                  @map("expertise_type_id")
+  numTechs                 Int                  @map("num_techs")
+  numCertifiedTechs        Int                  @map("num_certified_techs")
+  numVehicles              Int                  @map("num_vehicles")
+  servicePeriodsId         Int                  @map("service_periods_id")
+  contractTypeId           Int                  @map("contract_type_id")
+  numAccidents             Int                  @map("num_accidents")
+  numIncidents             Int                  @map("num_incidents")
+  numClaims                Int                  @map("num_claims")
+  numLegalCases            Int                  @map("num_legal_cases")
+  annualTurnover           Decimal              @map("annual_turnover") @db.Decimal(18, 2)
+  yearEstablished          Int                  @map("year_established")
+  headOfOperationsName     String               @map("head_of_operations_name") @db.VarChar(255)
+  constructManagerName     String               @map("construct_manager_name") @db.VarChar(255)
+  projManagerName          String               @map("proj_manager_name") @db.VarChar(255)
+  serviceManagerName       String               @map("service_manager_name") @db.VarChar(255)
+  enggManagerName          String               @map("engg_manager_name") @db.VarChar(255)
+  salesManagerName         String               @map("sales_manager_name") @db.VarChar(255)
+  officeAddressLine1       String               @map("office_address_line1") @db.VarChar(255)
+  officeAddressLine2       String?              @map("office_address_line2") @db.VarChar(255)
+  officePinCode            String               @map("office_pin_code") @db.VarChar(20)
+  officeStateId            Int                  @map("office_state_id")
+  officeArea               String               @map("office_area") @db.VarChar(100)
+  contactNumber            String               @map("contact_number") @db.VarChar(50)
+  preferredModeOfContactId Int                  @map("preferred_mode_of_contact_id")
+  registrationTimestamp    DateTime             @default(now()) @map("registration_timestamp") @db.Timestamp(6)
+  documents                Document[]
+  companyType              LookupCompanyTypes   @relation(fields: [companyTypeId], references: [companyTypeId])
+  contractType             LookupContractTypes  @relation(fields: [contractTypeId], references: [contractTypeId])
+  expertiseType            LookupExpertiseTypes @relation(fields: [expertiseTypeId], references: [expertiseTypeId])
+  officeState              LookupStates         @relation(fields: [officeStateId], references: [stateId])
+  preferredContactMode     LookupContactModes   @relation(fields: [preferredModeOfContactId], references: [contactModeId])
+  servicePeriod            LookupServicePeriods @relation(fields: [servicePeriodsId], references: [servicePeriodId])
+  serviceRequests          ServiceRequest[]
+  units                    Unit[]
 
   @@map("organizations")
 }
 
 /// Stores unique installation site addresses and contact information.
 model Location {
-  locationId               Int                 @id @default(autoincrement()) @map("location_id")
-  addressLine1             String              @map("address_line1") @db.VarChar(255)
-  addressLine2             String?             @map("address_line2") @db.VarChar(255) // Made optional
-  zipCode                  String              @map("zip_code") @db.VarChar(20)
-  stateId                  Int                 @map("state_id")
-  area                     String              @map("area") @db.VarChar(100)
-  contactNumber            String              @map("contact_number") @db.VarChar(50)
-  preferredModeOfContactId Int                 @map("preferred_mode_of_contact_id") // Location Preferred Contact Mode
-
-  // Relations
-  state                  LookupStates       @relation(fields: [stateId], references: [stateId])
-  preferredContactMode   LookupContactModes @relation(fields: [preferredModeOfContactId], references: [contactModeId])
-  units                  Unit[]
+  locationId               Int                @id @default(autoincrement()) @map("location_id")
+  addressLine1             String             @map("address_line1") @db.VarChar(255)
+  addressLine2             String?            @map("address_line2") @db.VarChar(255)
+  zipCode                  String             @map("zip_code") @db.VarChar(20)
+  stateId                  Int                @map("state_id")
+  area                     String             @map("area") @db.VarChar(100)
+  contactNumber            String             @map("contact_number") @db.VarChar(50)
+  preferredModeOfContactId Int                @map("preferred_mode_of_contact_id")
+  preferredContactMode     LookupContactModes @relation(fields: [preferredModeOfContactId], references: [contactModeId])
+  state                    LookupStates       @relation(fields: [stateId], references: [stateId])
+  units                    Unit[]
 
   @@map("locations")
 }
@@ -187,7 +172,7 @@ model Unit {
   locationId                      Int                 @map("location_id")
   manufacturerId                  Int                 @map("manufacturer_id")
   unitTypeId                      Int                 @map("unit_type_id")
-  contractTypeId                  Int                 @map("contract_type_id") // Unit Service Contract Type
+  contractTypeId                  Int                 @map("contract_type_id")
   numLandingDoors                 Int                 @map("num_landing_doors")
   numCabinDoors                   Int                 @map("num_cabin_doors")
   numFloors                       Int                 @map("num_floors")
@@ -198,17 +183,14 @@ model Unit {
   shaftHeightMm                   Decimal             @map("shaft_height_mm") @db.Decimal(10, 2)
   shaftDepthMm                    Decimal             @map("shaft_depth_mm") @db.Decimal(10, 2)
   pitMm                           Decimal             @map("pit_mm") @db.Decimal(10, 2)
-  installationSubmissionTimestamp DateTime            @default(now()) @map("installation_submission_timestamp") @db.Timestamp()
-
-  // Relations
-  organization     Organization         @relation(fields: [organizationId], references: [organizationId])
-  location         Location             @relation(fields: [locationId], references: [locationId])
-  manufacturer     LookupManufacturers  @relation(fields: [manufacturerId], references: [manufacturerId])
-  unitType         LookupUnitTypes      @relation(fields: [unitTypeId], references: [unitTypeId])
-  contractType     LookupContractTypes  @relation(fields: [contractTypeId], references: [contractTypeId])
-
-  documents        Document[]
-  serviceRequests  ServiceRequest[]
+  installationSubmissionTimestamp DateTime            @default(now()) @map("installation_submission_timestamp") @db.Timestamp(6)
+  documents                       Document[]
+  serviceRequests                 ServiceRequest[]
+  contractType                    LookupContractTypes @relation(fields: [contractTypeId], references: [contractTypeId])
+  location                        Location            @relation(fields: [locationId], references: [locationId])
+  manufacturer                    LookupManufacturers @relation(fields: [manufacturerId], references: [manufacturerId])
+  organization                    Organization        @relation(fields: [organizationId], references: [organizationId])
+  unitType                        LookupUnitTypes     @relation(fields: [unitTypeId], references: [unitTypeId])
 
   @@map("units")
 }
@@ -218,38 +200,34 @@ model Unit {
 /// must be enforced at the database level (e.g., using a CHECK constraint) or application level.
 /// Prisma schema cannot directly represent this complex constraint.
 model Document {
-  documentId       Int                 @id @default(autoincrement()) @map("document_id")
-  organizationId   Int?                @map("organization_id") // Nullable FK
-  unitId           Int?                @map("unit_id") // Nullable FK
-  documentTypeId   Int                 @map("document_type_id")
-  fileName         String              @map("file_name") @db.VarChar(255)
-  filePath         String              @map("file_path") @db.VarChar(512)
-  uploadTimestamp  DateTime            @default(now()) @map("upload_timestamp") @db.Timestamp()
-
-  // Relations
-  organization   Organization?        @relation(fields: [organizationId], references: [organizationId])
-  unit           Unit?                @relation(fields: [unitId], references: [unitId])
-  documentType   LookupDocumentTypes  @relation(fields: [documentTypeId], references: [documentTypeId])
+  documentId      Int                 @id @default(autoincrement()) @map("document_id")
+  organizationId  Int?                @map("organization_id")
+  unitId          Int?                @map("unit_id")
+  documentTypeId  Int                 @map("document_type_id")
+  fileName        String              @map("file_name") @db.VarChar(255)
+  filePath        String              @map("file_path") @db.VarChar(512)
+  uploadTimestamp DateTime            @default(now()) @map("upload_timestamp") @db.Timestamp(6)
+  documentType    LookupDocumentTypes @relation(fields: [documentTypeId], references: [documentTypeId])
+  organization    Organization?       @relation(fields: [organizationId], references: [organizationId])
+  unit            Unit?               @relation(fields: [unitId], references: [unitId])
 
   @@map("documents")
 }
 
 /// Stores data from the Service Form, representing requests for service on units.
 model ServiceRequest {
-  serviceRequestId     Int                 @id @default(autoincrement()) @map("service_request_id")
-  organizationId       Int                 @map("organization_id")
-  unitId               Int                 @map("unit_id")
-  servicePeriodId      Int                 @map("service_period_id")
-  requestContactNumber String              @map("request_contact_number") @db.VarChar(50)
-  requestContactModeId Int                 @map("request_contact_mode_id")
-  problemDescription   String              @map("problem_description") @db.Text
-  requestTimestamp     DateTime            @default(now()) @map("request_timestamp") @db.Timestamp()
-
-  // Relations
-  organization        Organization         @relation(fields: [organizationId], references: [organizationId])
-  unit                Unit                 @relation(fields: [unitId], references: [unitId])
-  servicePeriod       LookupServicePeriods @relation(fields: [servicePeriodId], references: [servicePeriodId])
-  requestContactMode  LookupContactModes   @relation(fields: [requestContactModeId], references: [contactModeId])
+  serviceRequestId     Int                  @id @default(autoincrement()) @map("service_request_id")
+  organizationId       Int                  @map("organization_id")
+  unitId               Int                  @map("unit_id")
+  servicePeriodId      Int                  @map("service_period_id")
+  requestContactNumber String               @map("request_contact_number") @db.VarChar(50)
+  requestContactModeId Int                  @map("request_contact_mode_id")
+  problemDescription   String               @map("problem_description")
+  requestTimestamp     DateTime             @default(now()) @map("request_timestamp") @db.Timestamp(6)
+  organization         Organization         @relation(fields: [organizationId], references: [organizationId])
+  requestContactMode   LookupContactModes   @relation(fields: [requestContactModeId], references: [contactModeId])
+  servicePeriod        LookupServicePeriods @relation(fields: [servicePeriodId], references: [servicePeriodId])
+  unit                 Unit                 @relation(fields: [unitId], references: [unitId])
 
   @@map("service_requests")
 }
@@ -259,27 +237,25 @@ model SparePartRequest {
   sparePartRequestId Int                 @id @default(autoincrement()) @map("spare_part_request_id")
   email              String              @map("email") @db.VarChar(255)
   partNumber         String              @map("part_number") @db.VarChar(100)
-  description        String              @map("description") @db.Text
+  description        String              @map("description")
   quantity           Int                 @map("quantity")
   manufacturerId     Int                 @map("manufacturer_id")
   countryId          Int                 @map("country_id")
-  requestTimestamp   DateTime            @default(now()) @map("request_timestamp") @db.Timestamp()
-
-  // Relations
-  manufacturer LookupManufacturers @relation(fields: [manufacturerId], references: [manufacturerId])
-  country      LookupCountries     @relation(fields: [countryId], references: [countryId])
+  requestTimestamp   DateTime            @default(now()) @map("request_timestamp") @db.Timestamp(6)
+  country            LookupCountries     @relation(fields: [countryId], references: [countryId])
+  manufacturer       LookupManufacturers @relation(fields: [manufacturerId], references: [manufacturerId])
 
   @@map("spare_part_requests")
 }
 
 /// Stores data from the Contact Us Form.
 model ContactQuery {
-  contactId             Int      @id @default(autoincrement()) @map("contact_id")
-  name                  String   @map("name") @db.VarChar(255)
-  email                 String   @map("email") @db.VarChar(255)
-  businessOrJobField    String   @map("business_or_job_field") @db.VarChar(255)
-  queryText             String   @map("query_text") @db.Text
-  submissionTimestamp   DateTime @default(now()) @map("submission_timestamp") @db.Timestamp()
+  contactId           Int      @id @default(autoincrement()) @map("contact_id")
+  name                String   @map("name") @db.VarChar(255)
+  email               String   @map("email") @db.VarChar(255)
+  businessOrJobField  String   @map("business_or_job_field") @db.VarChar(255)
+  queryText           String   @map("query_text")
+  submissionTimestamp DateTime @default(now()) @map("submission_timestamp") @db.Timestamp(6)
 
   @@map("contact_queries")
 }
