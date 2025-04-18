@@ -1,9 +1,13 @@
 # Ignore all files in the experiments directory
 _experiments/
+data/
+docs/
+cmds/
 
 # Node Modules
 node_modules/
 prisma/generated/client/
+generated/prisma/
 
 # Build Artifacts
 dist/
